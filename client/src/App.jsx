@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
-import { fetchRebalance, saveRebalance, fetchHistory } from './services/api'
 import RebalanceScreen from './components/RebalanceScreen'
 import HoldingsScreen from './components/HoldingsScreen'
 import HistoryScreen from './components/HistoryScreen'
+import { fetchRebalance, saveRebalance, fetchHistory, fetchClients } from './services/api'
 
-const CLIENT_ID = 'C001'
 
 export default function App() {
+  const [clientId, setClientId] = useState('C001')
+  const [clients, setClients] = useState([])
   const [activeTab, setActiveTab] = useState(0)
   const [rebalanceData, setRebalanceData] = useState(null)
   const [historyData, setHistoryData] = useState([])
@@ -16,15 +17,21 @@ export default function App() {
   const [toast, setToast] = useState(null)
 
   useEffect(() => {
+    loadClients()
     loadData()
-  }, [])
+  }, [clientId])  // re-runs whenever clientId changes
+
+  async function loadClients() {
+    const data = await fetchClients()
+    setClients(data)
+  }
 
   async function loadData() {
     try {
       setLoading(true)
       const [rebalance, history] = await Promise.all([
-        fetchRebalance(CLIENT_ID),
-        fetchHistory(CLIENT_ID),
+        fetchRebalance(clientId),
+        fetchHistory(clientId),
       ])
       setRebalanceData(rebalance)
       setHistoryData(history)
@@ -38,8 +45,8 @@ export default function App() {
   async function handleSave() {
     try {
       setSaving(true)
-      await saveRebalance(CLIENT_ID)
-      const history = await fetchHistory(CLIENT_ID)
+      await saveRebalance(clientId)
+      const history = await fetchHistory(clientId)
       setHistoryData(history)
       showToast('✓ Rebalancing saved successfully')
     } catch (err) {
@@ -93,6 +100,29 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        <div style={{ display:'flex', gap:6 }}>
+          {clients.map(c => (
+            <button
+              key={c.client_id}
+              onClick={() => setClientId(c.client_id)}
+              style={{
+                padding:'6px 14px',
+                borderRadius:6,
+                border:'1px solid #263552',
+                cursor:'pointer',
+                fontSize:12,
+                fontFamily:'monospace',
+                background: clientId === c.client_id ? '#4f8ef7' : 'transparent',
+                color: clientId === c.client_id ? '#fff' : '#7a8ba8',
+                transition:'all .15s'
+              }}
+            >
+              {c.client_name.split(' ')[0]}
+            </button>
+          ))}
+        </div>
+
         <div style={{ display:'flex', gap:4 }}>
           {tabs.map((tab, i) => (
             <button key={tab} onClick={() => setActiveTab(i)} style={{
