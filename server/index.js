@@ -22,6 +22,3 @@ app.use('/api/history',   historyRouter);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
-PORT=5000
-CLIENT_URL=https://your-frontend.vercel.app
