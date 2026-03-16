@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build output
+client/dist/
+
+# Environment
+.env
+
+# Database (optional - comment out if you want to include it)
+# model_portfolio.db
+
+# OS files
+.DS_Store
+Thumbs.db
